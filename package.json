@@ -1,0 +1,22 @@
+{
+  "name": "kektranslatebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.mjs",
+  "scripts": {
+    "start": "node app.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "config": "3.3.7",
+    "google-translate-api-x": "^10.4.1",
+    "node-telegram-bot-api": "0.56.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  }
+}
