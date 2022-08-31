@@ -3,8 +3,14 @@ process.env.NTBA_FIX_319 = true
 import TelegramBot from "node-telegram-bot-api"
 import config from "config"
 import translate from "google-translate-api-x"
-import { emojiRegex } from "./emoji.mjs"
-import { readBanList, sendToBan, writeError, writeLog } from "./utils.mjs"
+import {
+    readBanList,
+    sendToBan,
+    writeError,
+    writeLog,
+    checkIfTextContainsOnlyEmojis,
+    checkIfTextIsLink,
+} from "./utils.mjs"
 
 const bot = new TelegramBot(config.get("token"), { polling: true })
 const ownerId = 0
@@ -38,7 +44,11 @@ async function botController(msg) {
                 logFile,
                 `Request from banned user or group: User: ${
                     banList[`${userId}`]
-                }${banList[`${groupId}`] ? ", Group: " + banList[`${groupId}`] : ""}`
+                }${
+                    banList[`${groupId}`]
+                        ? ", Group: " + banList[`${groupId}`]
+                        : ""
+                }`
             )
             return
         }
@@ -51,9 +61,7 @@ async function botController(msg) {
                     text ? "\nText: " + text + "\n" : "\n"
                 }`
             )
-            if(userId !== ownerId) {
-                sendToBan(fullUserName, userId)
-            }
+            if (userId !== ownerId) sendToBan(fullUserName, userId)
             sendToBan(title, groupId)
             return
         }
@@ -66,20 +74,13 @@ async function botController(msg) {
                 text ? "\nText: " + text + "\n" : "\n"
             }`
         )
-        if (!text) {
-            return
-        }
-        let emojisLength = 0
-        for (const match of text.matchAll(emojiRegex)) {
-            if (match[0]) {
-                emojisLength += match[0].length
-            } else {
-                continue
-            }
-        }
-        if (text.length === emojisLength) {
-            return
-        }
+        if (!text) return
+
+        isUrl = checkIfTextIsLink(text)
+        if (isUrl) return
+
+        containsOnlyEmojis = checkIfTextContainsOnlyEmojis(text)
+        if (containsOnlyEmojis) return
 
         const res = await translate(text, {
             to: "en",
